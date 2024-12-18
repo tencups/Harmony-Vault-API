@@ -16,13 +16,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.http.MediaType;
 
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static com.example.HarmonyVault.constant.Constant.PHOTO_DIRECTORY;
+import static com.example.HarmonyVault.constant.Constant.AUDIO_DIRECTORY;
 import static org.springframework.http.MediaType.IMAGE_JPEG_VALUE;
 import static org.springframework.http.MediaType.IMAGE_PNG_VALUE;
 
@@ -77,4 +84,32 @@ public class ArtistResource {
         return Files.readAllBytes(Paths.get(PHOTO_DIRECTORY + filename));
     }
 
+
+
+    @PostMapping("/audio")
+    public ResponseEntity<String> uploadAudios(@RequestParam("id") String id, @RequestParam("files") MultipartFile[] files) {
+        try {
+            artistService.uploadAudios(id, files);
+            return ResponseEntity.ok("Audio files uploaded successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to upload audio: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Get all audio files for a given artist.
+     * This will return JSON with a list of byte[].
+     * For large files or multiple files, consider another approach, such as streaming or separate endpoints.
+     */
+    @GetMapping(value = "/audio-download/{filename}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    public ResponseEntity<byte[]> downloadAudio(@PathVariable String filename) throws IOException {
+        Path filePath = Paths.get(AUDIO_DIRECTORY).resolve(filename).normalize();
+        byte[] fileData = Files.readAllBytes(filePath);
+        return ResponseEntity.ok(fileData);
+    }
+
+
+
 }
+

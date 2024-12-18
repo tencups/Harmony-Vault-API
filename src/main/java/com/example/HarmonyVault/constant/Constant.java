@@ -3,6 +3,7 @@ package com.example.HarmonyVault.constant;
 public class Constant {
 
     public static final String PHOTO_DIRECTORY = System.getProperty("user.home") + "/Documents/HarmonyVault-Uploads/"; 
+    public static final String AUDIO_DIRECTORY = System.getProperty("user.home") + "/Documents/HarmonyVault-Uploads/audios";
     // retrieves the user's home directory path
     // on Windows, it might be C:\Users\Username
     public static final String X_REQUESTED_WITH = "X-Requested-With";

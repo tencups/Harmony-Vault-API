@@ -16,12 +16,17 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import static com.example.HarmonyVault.constant.Constant.PHOTO_DIRECTORY;
+import static com.example.HarmonyVault.constant.Constant.AUDIO_DIRECTORY;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+
+import java.io.IOException;
 
 @Service // Instantiate as service component/bean. Add to application context
 @Slf4j // Adds logger (log.info())
@@ -95,5 +100,43 @@ public class ArtistService {
             throw new RuntimeException("Unable to save image");
         }
     };
+
+
+    public List<String> uploadAudios(String id, MultipartFile[] files) {
+        Artist artist = getArtist(id);
+        List<String> audioPaths = new ArrayList<>();
+
+        for (MultipartFile file : files) {
+            String fileName = id + "-" + file.getOriginalFilename();
+            Path targetPath = Paths.get(AUDIO_DIRECTORY).resolve(fileName).normalize();
+
+            try {
+                if (!Files.exists(targetPath.getParent())) {
+                    Files.createDirectories(targetPath.getParent());
+                }
+                Files.copy(file.getInputStream(), targetPath, REPLACE_EXISTING);
+
+                // Construct a URL or a relative path to the audio file
+                String audioUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
+                                    .path("/artists/audio-download/")
+                                    .path(fileName)
+                                    .toUriString();
+
+                // Add the URL/path to the audioPaths list
+                audioPaths.add(audioUrl);
+            } catch (IOException e) {
+                throw new RuntimeException("Unable to save audio file: " + file.getOriginalFilename(), e);
+            }
+        }
+
+        // Update the artist entity to reference the audio paths
+        artist.setAudioPaths(audioPaths);
+        artistRepo.save(artist);
+
+        return audioPaths;  // Return the updated audio paths
+    }
+
+
+
 
 }

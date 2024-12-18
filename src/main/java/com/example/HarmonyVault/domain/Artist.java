@@ -2,9 +2,11 @@ package com.example.HarmonyVault.domain;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
@@ -12,6 +14,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.hibernate.annotations.UuidGenerator;
 
 
@@ -20,7 +26,7 @@ import org.hibernate.annotations.UuidGenerator;
 @Setter
 @NoArgsConstructor // Generates a no-argument constructor.
 @AllArgsConstructor // Generates a constructor that accepts all fields as arguments.
-@JsonInclude(JsonInclude.Include.NON_DEFAULT) // Ensures that only non-defaul/empty values are included in JSON serialization.
+//@JsonInclude(JsonInclude.Include.NON_DEFAULT) // Ensures that only non-defaul/empty values are included in JSON serialization.
 @Table(name = "artists") // database associated is named "artists"
 public class Artist {
     @Id // id is the primary key
@@ -34,5 +40,9 @@ public class Artist {
     @Lob
     private String biography;
     private String photoUrl;
+    @ElementCollection(fetch = FetchType.EAGER)
+    @Lob
+    private List<String> audioPaths = new ArrayList<>();
 
 }
+
